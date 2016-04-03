@@ -11,6 +11,10 @@
 		792B26DC1CAF1FB700E570E4 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 792B26DB1CAF1FB700E570E4 /* OpenGL.framework */; };
 		792B26E01CAF208B00E570E4 /* libglfw.3.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 792B26DF1CAF208B00E570E4 /* libglfw.3.1.dylib */; };
 		792B26E21CAF229300E570E4 /* libGLEW.1.13.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 792B26E11CAF229300E570E4 /* libGLEW.1.13.0.dylib */; };
+		792B26E61CAF647300E570E4 /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 792B26E41CAF647300E570E4 /* Application.cpp */; };
+		792B2AB71CAF921D00E570E4 /* XRShaderUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 792B2AB61CAF921D00E570E4 /* XRShaderUtils.cpp */; };
+		792B2ABE1CB0D5D800E570E4 /* libsoil2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 792B2ABD1CB0D5D800E570E4 /* libsoil2.a */; };
+		792B2AC01CB0D65200E570E4 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 792B2ABF1CB0D65200E570E4 /* CoreFoundation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -32,6 +36,13 @@
 		792B26DD1CAF202500E570E4 /* libGLEW.1.13.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGLEW.1.13.0.dylib; path = ../../../../../../usr/lib/libGLEW.1.13.0.dylib; sourceTree = "<group>"; };
 		792B26DF1CAF208B00E570E4 /* libglfw.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.1.dylib; path = ../../../../../../usr/local/lib/libglfw.3.1.dylib; sourceTree = "<group>"; };
 		792B26E11CAF229300E570E4 /* libGLEW.1.13.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGLEW.1.13.0.dylib; path = ../../../../../../usr/local/Cellar/glew/1.13.0/lib/libGLEW.1.13.0.dylib; sourceTree = "<group>"; };
+		792B26E41CAF647300E570E4 /* Application.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Application.cpp; sourceTree = "<group>"; };
+		792B26E51CAF647300E570E4 /* Application.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Application.hpp; sourceTree = "<group>"; };
+		792B2AB61CAF921D00E570E4 /* XRShaderUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XRShaderUtils.cpp; sourceTree = "<group>"; };
+		792B2AB91CAF92C800E570E4 /* XRShaderUtils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = XRShaderUtils.hpp; sourceTree = "<group>"; };
+		792B2ABA1CB05CEA00E570E4 /* shader */ = {isa = PBXFileReference; lastKnownFileType = folder; name = shader; path = res/shader; sourceTree = "<group>"; };
+		792B2ABD1CB0D5D800E570E4 /* libsoil2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libsoil2.a; path = PDFA/lib/libsoil2.a; sourceTree = "<group>"; };
+		792B2ABF1CB0D65200E570E4 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,6 +50,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				792B2ABE1CB0D5D800E570E4 /* libsoil2.a in Frameworks */,
+				792B2AC01CB0D65200E570E4 /* CoreFoundation.framework in Frameworks */,
 				792B26E01CAF208B00E570E4 /* libglfw.3.1.dylib in Frameworks */,
 				792B26E21CAF229300E570E4 /* libGLEW.1.13.0.dylib in Frameworks */,
 				792B26DC1CAF1FB700E570E4 /* OpenGL.framework in Frameworks */,
@@ -51,6 +64,8 @@
 		792B26C81CAF1F5200E570E4 = {
 			isa = PBXGroup;
 			children = (
+				792B2ABF1CB0D65200E570E4 /* CoreFoundation.framework */,
+				792B2ABD1CB0D5D800E570E4 /* libsoil2.a */,
 				792B26E11CAF229300E570E4 /* libGLEW.1.13.0.dylib */,
 				792B26DF1CAF208B00E570E4 /* libglfw.3.1.dylib */,
 				792B26DD1CAF202500E570E4 /* libGLEW.1.13.0.dylib */,
@@ -71,7 +86,12 @@
 		792B26D31CAF1F5200E570E4 /* PDFA */ = {
 			isa = PBXGroup;
 			children = (
+				792B2ABA1CB05CEA00E570E4 /* shader */,
+				792B2AB91CAF92C800E570E4 /* XRShaderUtils.hpp */,
+				792B2AB61CAF921D00E570E4 /* XRShaderUtils.cpp */,
 				792B26D41CAF1F5200E570E4 /* main.cpp */,
+				792B26E41CAF647300E570E4 /* Application.cpp */,
+				792B26E51CAF647300E570E4 /* Application.hpp */,
 			);
 			path = PDFA;
 			sourceTree = "<group>";
@@ -132,6 +152,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				792B2AB71CAF921D00E570E4 /* XRShaderUtils.cpp in Sources */,
+				792B26E61CAF647300E570E4 /* Application.cpp in Sources */,
 				792B26D51CAF1F5200E570E4 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -224,11 +246,13 @@
 				HEADER_SEARCH_PATHS = (
 					/usr/local/include/,
 					/opt/local/include/,
+					"$(PROJECT_DIR)/PDFA/include",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/lib/,
 					/opt/local/lib/,
 					/usr/local/Cellar/glew/1.13.0/lib/,
+					"$(PROJECT_DIR)/PDFA/lib",
 				);
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -241,11 +265,13 @@
 				HEADER_SEARCH_PATHS = (
 					/usr/local/include/,
 					/opt/local/include/,
+					"$(PROJECT_DIR)/PDFA/include",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/lib/,
 					/opt/local/lib/,
 					/usr/local/Cellar/glew/1.13.0/lib/,
+					"$(PROJECT_DIR)/PDFA/lib",
 				);
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -271,6 +297,7 @@
 				792B26DA1CAF1F5200E570E4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -9,6 +9,11 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <iostream>
+
+#include "Application.hpp"
+
+
 int main(void)
 {
     GLFWwindow* window;
@@ -18,26 +23,40 @@ int main(void)
         return -1;
     
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "PDFA", NULL, NULL);
+    window = glfwCreateWindow(APPLICATION_WWIDTH, APPLICATION_WHEIGHT, "PDFA", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
         return -1;
     }
     
+    /* Make the window's context current */
+    glfwMakeContextCurrent(window);
+    
+    
     /*initialize glew*/
-    if(!glewInit())
+    glewExperimental=GL_TRUE;
+    GLenum err=glewInit();
+    if(err!=GLEW_OK)
     {
+        std::cout<<"glewInit failed, aborting."<<std::endl;
         return -1;
     }
     
-    /* Make the window's context current */
-    glfwMakeContextCurrent(window);
+    Application::appSetup(window);
+    
+    glEnable(GL_DEPTH_TEST);
     
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
+        
+        /*Clear Color&Depth Buffer*/
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
         /* Render here */
+        Application::appLoop();
         
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
@@ -45,6 +64,8 @@ int main(void)
         /* Poll for and process events */
         glfwPollEvents();
     }
+    
+    Application::appDestroy();
     
     glfwTerminate();
     return 0;
