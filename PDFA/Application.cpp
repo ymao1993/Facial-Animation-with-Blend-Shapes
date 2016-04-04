@@ -17,14 +17,35 @@
 #include "XRShaderUtils.hpp"
 #include "SOIL2.h"
 
+#define NUM_BLENDSHAPE 14
+
 namespace Application
 {
     /*const*/
-    static const char* ObjFileName          = "/Users/MaoYu/Desktop/PDFA/PDFA/res/model/bunny/bunny.obj";
-    static const char* textureFileName      = "/Users/MaoYu/Desktop/PDFA/PDFA/res/model/bunny/bunny-atlas.jpg";
+    static const char* ObjFileName          = "/Users/MaoYu/Desktop/PDFA/PDFA/res/model/head/FaceKiss.obj";
+    static const char* textureFileName      = "/Users/MaoYu/Desktop/PDFA/PDFA/res/model/head/headTexture.jpg";
     static const char* vertexShaderName     = "/Users/MaoYu/Desktop/PDFA/PDFA/res/shader/defaultShader.vs.glsl";
     static const char* fragmentShaderName   = "/Users/MaoYu/Desktop/PDFA/PDFA/res/shader/defaultShader.fs.glsl";
-    static const float objScale = 0.005;
+    static const char* blendShapesFileNames[NUM_BLENDSHAPE] =
+    {
+        "/Users/MaoYu/Desktop/PDFA/PDFA/res/model/head/FaceCheekPuff.obj",
+        "/Users/MaoYu/Desktop/PDFA/PDFA/res/model/head/FaceCheekSuck.obj",
+        "/Users/MaoYu/Desktop/PDFA/PDFA/res/model/head/FaceJawOpen.obj",
+        "/Users/MaoYu/Desktop/PDFA/PDFA/res/model/head/FaceKiss.obj",
+        "/Users/MaoYu/Desktop/PDFA/PDFA/res/model/head/FaceLeftBrowDown.obj",
+        "/Users/MaoYu/Desktop/PDFA/PDFA/res/model/head/FaceLeftBrowUp.obj",
+        "/Users/MaoYu/Desktop/PDFA/PDFA/res/model/head/FaceLeftFrown.obj",
+        "/Users/MaoYu/Desktop/PDFA/PDFA/res/model/head/FaceLeftSmile.obj",
+        "/Users/MaoYu/Desktop/PDFA/PDFA/res/model/head/FaceLeftSneer.obj",
+        "/Users/MaoYu/Desktop/PDFA/PDFA/res/model/head/FaceRightBrowDown.obj",
+        "/Users/MaoYu/Desktop/PDFA/PDFA/res/model/head/FaceRightBrowUp.obj",
+        "/Users/MaoYu/Desktop/PDFA/PDFA/res/model/head/FaceRightFrown.obj",
+        "/Users/MaoYu/Desktop/PDFA/PDFA/res/model/head/FaceRightSmile.obj",
+        "/Users/MaoYu/Desktop/PDFA/PDFA/res/model/head/FaceRightSneer.obj"
+    };
+    
+    
+    static const float objScale = 0.25;
     
     /*application*/
     static GLFWwindow* window;
@@ -47,12 +68,18 @@ namespace Application
     static GLuint texture;
     static GLuint sampler;
     static void loadObj();
-    static void loadTriangle();
     static void loadShader();
     static void initVBOs();
     static void initVAO();
     static void loadTexture();
     static void initSampler();
+    static void initBlendShapes();
+    
+    /*blend shapes*/
+    static GLuint bsbufferTexture;
+    static GLuint bstbo;
+    static GLuint bt_sampler;
+    
     
     /*camera*/
     static float camera_speed;
@@ -69,10 +96,11 @@ namespace Application
     static glm::mat4 getWorld2View();
     
     
-    
     void appSetup(GLFWwindow* window)
     {
         std::cout << "Setting up application..." << std::endl;
+        char *version = (char*)glGetString(GL_VERSION);
+        std::cout <<*version<<std::endl ;
         
         std::cout << "- Set window instance..." << std::endl;
         setWindowInst(window);
@@ -82,6 +110,9 @@ namespace Application
         
         std::cout << "- Initializing Data" << std::endl;
         initData();
+        
+        std::cout << "- Preparing Blendshapes" << std::endl;
+        initBlendShapes();
         
         std::cout << "- Initialize Camera..." << std::endl;
         initCamera();
@@ -115,8 +146,9 @@ namespace Application
         glUseProgram(program);
         glBindVertexArray(vao);
         glBindTexture(GL_TEXTURE_2D, texture);
+        glBindTexture(GL_TEXTURE_BUFFER, bsbufferTexture);
         
-        //set uniforms
+        //set uniforms - for transformation
         GLuint m2vlocation =  glGetUniformLocation(program, "m2v");
         GLuint persplocation = glGetUniformLocation(program, "persp");
         glm::mat4 m2w = glm::scale(glm::mat4(), glm::vec3(objScale,objScale,objScale));
@@ -125,8 +157,16 @@ namespace Application
         glUniformMatrix4fv(m2vlocation, 1, GL_FALSE, glm::value_ptr(getWorld2View() * m2w));
         glUniformMatrix4fv(persplocation, 1, GL_FALSE, glm::value_ptr(getPerspective()));
         
+        //set uniforms - for texture mapping
         GLuint samplerlocation = glGetUniformLocation(program,"sampler");
         glUniform1i(samplerlocation, sampler);
+        
+        //set uniforms - for blending shapes
+        GLuint weightsLocation = glGetUniformLocation(program,"weights");
+        const float weights[NUM_BLENDSHAPE] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+        glUniform1fv(weightsLocation, NUM_BLENDSHAPE, weights);
+        GLuint bsbtlocation = glGetUniformLocation(program,"bs_sampler");
+        glUniform1i(bsbtlocation,bt_sampler);
         
         //drawcall
         glDrawArrays(GL_TRIANGLES, 0, size_positions/3);
@@ -214,11 +254,9 @@ namespace Application
                 for (int viter = 0; viter < 3; viter ++)
                 {
                     int vidx = shapes[i].mesh.indices[3*f+viter];
-                    
                     positions[count1++] = shapes[i].mesh.positions[vidx*3 + 0];
                     positions[count1++] = shapes[i].mesh.positions[vidx*3 + 1];
                     positions[count1++] = shapes[i].mesh.positions[vidx*3 + 2];
-                    
                     texcoords[count2++] = shapes[i].mesh.texcoords[vidx*2 + 0];
                     texcoords[count2++] = shapes[i].mesh.texcoords[vidx*2 + 1];
                 }
@@ -307,6 +345,95 @@ namespace Application
     {
         glGenSamplers(1,&sampler);
         glBindSampler(texture, sampler);
+    }
+    
+    /**
+     * Load blendshapes obj from files, compute the differneces with neutral expression,
+     * and stack the data into a texture buffer.
+     */
+    void initBlendShapes()
+    {
+        //Read positions data from blendshape files
+        std::vector<std::vector<float>> blendshape_positions(NUM_BLENDSHAPE);
+        for(int i=0; i<NUM_BLENDSHAPE; i++)
+        {
+            const char* ObjFileName = blendShapesFileNames[i];
+            
+            std::cout << "reading " << ObjFileName << std::endl;
+            
+            std::vector<tinyobj::shape_t> shapes;
+            std::vector<tinyobj::material_t> materials;
+            
+            //load obj file
+            std::string err;
+            bool ret = tinyobj::LoadObj(shapes, materials, err, ObjFileName);
+            
+            if (!err.empty()) { // `err` may contain warning message.
+                std::cerr << err << std::endl;
+            }
+            
+            if (!ret) {
+                exit(1);
+            }
+            
+            //initialize positions vector array
+            int numf = 0;
+            for (size_t i = 0; i < shapes.size(); i++)
+            {
+                numf += shapes[i].mesh.indices.size()/3;
+            }
+            blendshape_positions[i].reserve(numf * 9);
+            
+            
+            //fill the positions array
+            for (size_t j = 0; j < shapes.size(); j++) {
+                
+                //make sure the data is good
+                assert((shapes[j].mesh.indices.size()   % 3) == 0);
+                assert((shapes[j].mesh.positions.size() % 3) == 0);
+                assert((shapes[j].mesh.texcoords.size() % 2) == 0);
+                
+                //for all the triangles
+                for (size_t f = 0; f < shapes[j].mesh.indices.size() / 3; f++) {
+                    
+                    //for all the 3 vertices
+                    for (int viter = 0; viter < 3; viter ++)
+                    {
+                        int vidx = shapes[j].mesh.indices[3*f+viter];
+                        blendshape_positions[i].push_back(shapes[j].mesh.positions[vidx*3 + 0]);
+                        blendshape_positions[i].push_back(shapes[j].mesh.positions[vidx*3 + 1]);
+                        blendshape_positions[i].push_back(shapes[j].mesh.positions[vidx*3 + 2]);
+                    }
+                }
+            }
+        }
+        
+        //stack the diffrence vector into a texture buffer
+        std::vector<float> bstboData;
+        for(int j=0; j< size_positions;j++)
+        {
+            for(int i=0; i<NUM_BLENDSHAPE; i++)
+            {
+                bstboData.push_back(blendshape_positions[i][j] - positions[j]);
+            }
+        }
+        
+        //initialize the texture buffer object(TBO)
+        glGenBuffers(1,&bstbo);
+        glBindBuffer(GL_TEXTURE_BUFFER, bstbo);
+        glBufferData(GL_TEXTURE_BUFFER, sizeof(GLfloat) * bstboData.size(), &bstboData, GL_STATIC_DRAW);
+        
+        //attach the TBO to the TBOTexture
+        glGenTextures(1, &bsbufferTexture);
+        glBindTexture(GL_TEXTURE_BUFFER, bsbufferTexture);
+        glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, bstbo);
+        
+        //bind a sampler to the texbuffer
+        glGenSamplers(1,&bt_sampler);
+        glBindSampler(bsbufferTexture,bt_sampler);
+        
+        //unbind
+        glBindBuffer(GL_TEXTURE_BUFFER, 0);
     }
     
     /**

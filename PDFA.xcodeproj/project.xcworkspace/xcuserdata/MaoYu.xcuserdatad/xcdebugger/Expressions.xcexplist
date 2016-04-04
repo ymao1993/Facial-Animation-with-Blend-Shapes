@@ -27,5 +27,13 @@
             </PersistentString>
          </PersistentStrings>
       </ContextState>
+      <ContextState
+         contextName = "Application::initBlendShapes():Application.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "bstboData[0]">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
    </ContextStates>
 </VariablesViewState>
