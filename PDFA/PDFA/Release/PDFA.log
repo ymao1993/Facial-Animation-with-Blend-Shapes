@@ -1,0 +1,35 @@
+﻿Build started 4/4/2016 6:04:22 PM.
+     1>Project "\\andrew.ad.cmu.edu\users\users4\ymao1\Desktop\PDFA\PDFA\PDFA\PDFA\PDFA.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I\\andrew.ad.cmu.edu\users\users4\ymao1\Desktop\PDFA\PDFA\PDFA\PDFA\include /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D _CRT_SECURE_NO_WARNINGS /D _MBCS /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt src\Application.cpp src\main.cpp
+         Application.cpp
+     1>src\Application.cpp(386): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
+                 src\Application.cpp(382) : definition of 'i' ignored
+                 src\Application.cpp(359) : definition of 'i' used
+     1>src\Application.cpp(404): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
+                 src\Application.cpp(382) : definition of 'i' ignored
+                 src\Application.cpp(359) : definition of 'i' used
+     1>src\Application.cpp(405): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
+                 src\Application.cpp(382) : definition of 'i' ignored
+                 src\Application.cpp(359) : definition of 'i' used
+     1>src\Application.cpp(406): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
+                 src\Application.cpp(382) : definition of 'i' ignored
+                 src\Application.cpp(359) : definition of 'i' used
+         main.cpp
+     1>src\main.cpp(26): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"\\andrew.ad.cmu.edu\users\users4\ymao1\Desktop\PDFA\PDFA\PDFA\Release\PDFA.exe" /NOLOGO /LIBPATH:\\andrew.ad.cmu.edu\users\users4\ymao1\Desktop\PDFA\PDFA\PDFA\PDFA\libs glew32.lib glfw3.lib opengl32.lib SOIL.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"\\andrew.ad.cmu.edu\users\users4\ymao1\Desktop\PDFA\PDFA\PDFA\Release\PDFA.pdb" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"\\andrew.ad.cmu.edu\users\users4\ymao1\Desktop\PDFA\PDFA\PDFA\Release\PDFA.lib" /MACHINE:X86 /SAFESEH Release\imgui.obj
+         Release\imgui_demo.obj
+         Release\imgui_draw.obj
+         Release\imgui_impl_glfw_gl3.obj
+         Release\Application.obj
+         Release\main.obj
+         Release\XRShaderUtils.obj
+         Generating code
+         Finished generating code
+         PDFA.vcxproj -> \\andrew.ad.cmu.edu\users\users4\ymao1\Desktop\PDFA\PDFA\PDFA\Release\PDFA.exe
+     1>Done Building Project "\\andrew.ad.cmu.edu\users\users4\ymao1\Desktop\PDFA\PDFA\PDFA\PDFA\PDFA.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:07.16
