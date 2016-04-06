@@ -20,38 +20,33 @@
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_impl_glfw_gl3.h"
 
-#define NUM_BLENDSHAPE 14
+#define NUM_BLENDSHAPE 6
 
 namespace Application
 {
     /*const*/
-    static const char* ObjFileName          = "res/model/head/FaceDefault.obj";
-    static const char* textureFileName      = "res/model/head/headTexture.jpg";
+    static const char* ObjFileName          = "res/model/humanHead/head-reference.obj";
+    static const char* textureFileName      = "res/model/humanHead/headTexture.jpg";
     static const char* vertexShaderName     = "res/shader/defaultShader.vs.glsl";
     static const char* fragmentShaderName   = "res/shader/defaultShader.fs.glsl";
     static const char* blendShapesFileNames[NUM_BLENDSHAPE] =
     {
-        "res/model/head/FaceCheekPuff.obj",
-        "res/model/head/FaceCheekSuck.obj",
-        "res/model/head/FaceJawOpen.obj",
-        "res/model/head/FaceKiss.obj",
-        "res/model/head/FaceLeftBrowDown.obj",
-        "res/model/head/FaceLeftBrowUp.obj",
-        "res/model/head/FaceLeftFrown.obj",
-        "res/model/head/FaceLeftSmile.obj",
-        "res/model/head/FaceLeftSneer.obj",
-        "res/model/head/FaceRightBrowDown.obj",
-        "res/model/head/FaceRightBrowUp.obj",
-        "res/model/head/FaceRightFrown.obj",
-        "res/model/head/FaceRightSmile.obj",
-        "res/model/head/FaceRightSneer.obj"
+        "res/model/humanHead/head-01-anger.obj",
+        "res/model/humanHead/head-02-cry.obj",
+        "res/model/humanHead/head-03-fury.obj",
+        "res/model/humanHead/head-04-grin.obj",
+        "res/model/humanHead/head-05-laugh.obj",
+        "res/model/humanHead/head-06-rage.obj",
+        //"res/model/humanHead/head-07-sad.obj",
+        //"res/model/humanHead/head-08-smile.obj",
+        //"res/model/humanHead/head-09-surprise.obj",
     };
     
     
-    static const float objScale = 0.25;
+    static const float objScale = 0.12;
     
     /*application*/
-    static GLFWwindow* window;
+    static GLFWwindow* window = NULL;
     static bool setWindowInst(GLFWwindow* window);
     static void render();
     static void loadResources();
@@ -62,17 +57,21 @@ namespace Application
 	static void shutdownGUI();
     
     /*data*/
-    static GLfloat* positions;
-    static GLfloat* texcoords;
-    static int size_positions;
-    static int size_texcoords;
+	static GLfloat* positions = NULL;
+	static GLfloat* texcoords = NULL;
+	static GLfloat* normals   = NULL;
+    static int size_positions = 0;
+	static int size_normals = 0;
+    static int size_texcoords = 0;
+	bool hasTC = true; //has texture coordinates?
     
     /*shader*/
-    static GLuint program;
-    static GLuint vao;
-    static GLuint vbo_positions;
-    static GLuint vbo_texcoords;
-    static GLuint texture;
+    static GLuint program = 0;
+	static GLuint vao = 0;
+	static GLuint vbo_positions = 0;
+	static GLuint vbo_normals = 0;
+	static GLuint vbo_texcoords = 0;
+	static GLuint texture = 0;
     static void loadObj();
     static void loadShader();
 	static void initData();
@@ -80,10 +79,18 @@ namespace Application
     static void initVAO();
     static void loadTexture();
     static void initBlendShapes();
+
+	/*lighting*/
+	static glm::vec3 lightDir(-0.57735, -0.57735, -0.57735);
+	static float ambientf  = 0.3f;
+	static float diffusef  = 0.4f;
+	static float specularf = 0.8f;
+	static float shininessf = 30.f;
     
     /*blend shapes*/
 	static float weights[NUM_BLENDSHAPE] = { 0 };
 	static GLuint vbo_bs_positions[NUM_BLENDSHAPE];
+	static GLuint vbo_bs_normals[NUM_BLENDSHAPE];
     
     
     /*camera*/
@@ -104,7 +111,7 @@ namespace Application
     void appSetup(GLFWwindow* window)
     {
         std::cout << "Setting up application..." << std::endl;
-        
+
         std::cout << "- Set window instance..." << std::endl;
         setWindowInst(window);
         
@@ -137,13 +144,15 @@ namespace Application
     {
 		shutdownGUI();
 
-        free(positions);
-        free(texcoords);
+		if (positions != NULL) { free(positions); }
+		if (texcoords != NULL) { free(texcoords); }
+		if (normals != NULL)   { free(normals); }
         glDeleteBuffers     (1, &vbo_positions);
         glDeleteBuffers     (1, &vbo_texcoords);
-        glDeleteVertexArrays(1, &vao);
+		glDeleteBuffers		(1, &vbo_normals);
         glDeleteTextures	(1, &texture);
 		glDeleteBuffers(NUM_BLENDSHAPE, vbo_bs_positions);
+		glDeleteVertexArrays(1, &vao);
     }
     
     /**
@@ -152,25 +161,44 @@ namespace Application
     static glm::mat4 rotate;
     void render()
     {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         //bind
         glUseProgram(program);
         glBindVertexArray(vao);
         glBindTexture(GL_TEXTURE_2D, texture);
         
         //set uniforms - for transformation
-        GLuint m2vlocation =  glGetUniformLocation(program, "m2v");
+		GLuint m2wlocation = glGetUniformLocation(program, "m2w");
+		glm::mat4 m2w = glm::scale(glm::mat4(), glm::vec3(objScale, objScale, objScale));
+		//rotate = glm::rotate(rotate, glm::radians(0.2f), glm::vec3(0,1,0)); //rotate for fun
+		m2w = m2w * rotate;
+		glUniformMatrix4fv(m2wlocation, 1, GL_FALSE, glm::value_ptr(m2w));
+        GLuint w2vlocation =  glGetUniformLocation(program, "w2v");
+		glUniformMatrix4fv(w2vlocation, 1, GL_FALSE, glm::value_ptr(getWorld2View()));
         GLuint persplocation = glGetUniformLocation(program, "persp");
-        glm::mat4 m2w = glm::scale(glm::mat4(), glm::vec3(objScale,objScale,objScale));
-        //rotate = glm::rotate(rotate, glm::radians(0.2f), glm::vec3(0,1,0)); //rotate for fun
-        m2w = m2w * rotate;
-        glUniformMatrix4fv(m2vlocation, 1, GL_FALSE, glm::value_ptr(getWorld2View() * m2w));
         glUniformMatrix4fv(persplocation, 1, GL_FALSE, glm::value_ptr(getPerspective()));
         
         //set uniforms - for blending shapes
         GLuint weightsLocation = glGetUniformLocation(program,"weights");
         glUniform1fv(weightsLocation, NUM_BLENDSHAPE, weights);
-        
+
+		//set uniforms - for texture
+		GLuint hasTextureLocation = glGetUniformLocation(program, "hasTexture");
+		glUniform1d(hasTextureLocation, hasTC);
+
+		//set uniforms - for lighting
+		GLuint lightlocation = glGetUniformLocation(program, "light");
+		glUniform3f(lightlocation, lightDir.x, lightDir.y, lightDir.z);
+		GLuint eyeposlocation = glGetUniformLocation(program, "eyepos");
+		glUniform3f(eyeposlocation, camera_position.x, camera_position.y, camera_position.z);
+		GLuint ambientlocation = glGetUniformLocation(program, "ambient");
+		glUniform3f(ambientlocation, ambientf, ambientf, ambientf);
+		GLuint diffuselocation = glGetUniformLocation(program, "diffuse");
+		glUniform3f(diffuselocation, diffusef, diffusef, diffusef);
+		GLuint specularlocation = glGetUniformLocation(program, "specular");
+		glUniform3f(specularlocation, specularf, specularf, specularf);
+		GLuint deltalocation = glGetUniformLocation(program, "delta");
+		glUniform1f(deltalocation, shininessf);
+
         //drawcall
         glDrawArrays(GL_TRIANGLES, 0, size_positions/3);
         
@@ -186,9 +214,9 @@ namespace Application
      */
     void loadResources()
     {
+		loadShader();
         loadObj();
         loadTexture();
-        loadShader();
     }
     
     /**
@@ -234,16 +262,20 @@ namespace Application
         for (size_t i = 0; i < shapes.size(); i++)
         {
             numf += shapes[i].mesh.indices.size()/3;
+			if (shapes[i].mesh.texcoords.size() == 0) hasTC = false;
         }
-        positions = (float*) malloc(sizeof(GLfloat) * numf * 9);
-        texcoords = (float*) malloc(sizeof(GLfloat) * numf * 6);
+        positions	   = (float*) malloc(sizeof(GLfloat) * numf * 9);
+		normals		   = (float*)malloc(sizeof(GLfloat)* numf * 9);
+		texcoords	   = (float*)malloc(sizeof(GLfloat)* numf * 6);
         size_positions = numf * 9;
-        size_texcoords = numf * 6;
+		size_normals   = numf * 9;
+		size_texcoords = numf * 6;
         
         
         //fill the positions and texcoords array
         int count1 = 0;
-        int count2 = 0;
+		int count2 = 0;
+        int count3 = 0;
         for (size_t i = 0; i < shapes.size(); i++) {
             
             //make sure the data is good
@@ -261,8 +293,14 @@ namespace Application
                     positions[count1++] = shapes[i].mesh.positions[vidx*3 + 0];
                     positions[count1++] = shapes[i].mesh.positions[vidx*3 + 1];
                     positions[count1++] = shapes[i].mesh.positions[vidx*3 + 2];
-                    texcoords[count2++] = shapes[i].mesh.texcoords[vidx*2 + 0];
-                    texcoords[count2++] = shapes[i].mesh.texcoords[vidx*2 + 1];
+					normals  [count2++] = shapes[i].mesh.normals  [vidx*3 + 0];
+					normals  [count2++] = shapes[i].mesh.normals  [vidx*3 + 1];
+					normals  [count2++] = shapes[i].mesh.normals  [vidx*3 + 2];
+					if (hasTC)
+					{
+						texcoords[count3++] = shapes[i].mesh.texcoords[vidx*2 + 0];
+						texcoords[count3++] = shapes[i].mesh.texcoords[vidx*2 + 1];
+					}
                 }
             }
         }
@@ -290,6 +328,12 @@ namespace Application
             //allocate memory for the buffer object bound to a binding target
             glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*size_texcoords, texcoords, GL_STATIC_DRAW);
         }
+		{
+			//for the normals
+			glGenBuffers(1, &vbo_normals);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo_normals);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*size_normals, normals, GL_STATIC_DRAW);
+		}
         
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
@@ -312,15 +356,24 @@ namespace Application
 			glVertexAttribFormat(location, 3, GL_FLOAT, GL_FALSE, 0);
 			glEnableVertexAttribArray(location);
 		}
-        
-        //set up texcoords' attribute bindings
+
+		//set up texcoords' attribute bindings
 		{
 			GLuint location = glGetAttribLocation(program, "vs_texcoord");
 			glVertexAttribBinding(location, location);
 			glBindVertexBuffer(location, vbo_texcoords, 0, sizeof(GLfloat)* 2);
 			glVertexAttribFormat(location, 2, GL_FLOAT, GL_FALSE, 0);
 			glEnableVertexAttribArray(location);
-		} 
+		}
+
+		//set up normals' attribute bindings
+		{
+			GLuint location = glGetAttribLocation(program, "vs_norm");
+			glVertexAttribBinding(location, location);
+			glBindVertexBuffer(location, vbo_normals, 0, sizeof(GLfloat)* 3);
+			glVertexAttribFormat(location, 3, GL_FLOAT, GL_FALSE, 0);
+			glEnableVertexAttribArray(location);
+		}
 
         //unbind vao
         glBindVertexArray(0);
@@ -356,6 +409,7 @@ namespace Application
     {
         //Read positions data from blendshape files
         std::vector<std::vector<float>> blendshape_positions(NUM_BLENDSHAPE);
+		std::vector<std::vector<float>> blendshape_normals(NUM_BLENDSHAPE);
         for(int i=0; i<NUM_BLENDSHAPE; i++)
         {
             const char* ObjFileName = blendShapesFileNames[i];
@@ -378,12 +432,8 @@ namespace Application
             }
             
             //initialize positions vector array
-            int numf = 0;
-            for (size_t i = 0; i < shapes.size(); i++)
-            {
-                numf += shapes[i].mesh.indices.size()/3;
-            }
-            blendshape_positions[i].reserve(numf * 9);
+            blendshape_positions[i].reserve(size_positions);
+			blendshape_normals[i].reserve(size_normals);
             
             
             //fill the positions array
@@ -404,34 +454,52 @@ namespace Application
                         blendshape_positions[i].push_back(shapes[j].mesh.positions[vidx*3 + 0]);
                         blendshape_positions[i].push_back(shapes[j].mesh.positions[vidx*3 + 1]);
                         blendshape_positions[i].push_back(shapes[j].mesh.positions[vidx*3 + 2]);
+						blendshape_normals[i].push_back(shapes[j].mesh.normals[vidx * 3 + 0]);
+						blendshape_normals[i].push_back(shapes[j].mesh.normals[vidx * 3 + 1]);
+						blendshape_normals[i].push_back(shapes[j].mesh.normals[vidx * 3 + 2]);
                     }
                 }
             }
         }
         
-		//compute the different vector
+		//compute the difference vector
 		for (int j = 0; j< size_positions; j++)
 		{
 			for (int i = 0; i<NUM_BLENDSHAPE; i++)
 			{
 				blendshape_positions[i][j] -= positions[j];
+				blendshape_normals[i][j] -= normals[j];
 			}
 		}
 
 		//set up vertex buffer objects
 		glBindVertexArray(vao);
 		glGenBuffers(NUM_BLENDSHAPE, vbo_bs_positions);
+		glGenBuffers(NUM_BLENDSHAPE, vbo_bs_normals);
 		for (int i = 0; i < NUM_BLENDSHAPE; i++)
 		{
-			glBindBuffer(GL_ARRAY_BUFFER, vbo_bs_positions[i]);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * blendshape_positions[i].size(), &blendshape_positions[i][0], GL_STATIC_DRAW);
-			char attriName[10];
-			sprintf(attriName, "pos%d", i);
-			GLuint location = glGetAttribLocation(program, attriName);
-			glVertexAttribBinding(location, location);
-			glBindVertexBuffer(location, vbo_bs_positions[i], 0, sizeof(GLfloat)* 3);
-			glVertexAttribFormat(location, 3, GL_FLOAT, GL_FALSE, 0);
-			glEnableVertexAttribArray(location);
+			{
+				glBindBuffer(GL_ARRAY_BUFFER, vbo_bs_positions[i]);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)* blendshape_positions[i].size(), &blendshape_positions[i][0], GL_STATIC_DRAW);
+				char attriName[10];
+				sprintf(attriName, "pos%d", i);
+				GLuint location = glGetAttribLocation(program, attriName);
+				glVertexAttribBinding(location, location);
+				glBindVertexBuffer(location, vbo_bs_positions[i], 0, sizeof(GLfloat)* 3);
+				glVertexAttribFormat(location, 3, GL_FLOAT, GL_FALSE, 0);
+				glEnableVertexAttribArray(location);
+			}
+			{
+				glBindBuffer(GL_ARRAY_BUFFER, vbo_bs_normals[i]);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)* blendshape_normals[i].size(), &blendshape_normals[i][0], GL_STATIC_DRAW);
+				char attriName[10];
+				sprintf(attriName, "norm%d", i);
+				GLuint location = glGetAttribLocation(program, attriName);
+				glVertexAttribBinding(location, location);
+				glBindVertexBuffer(location, vbo_bs_normals[i], 0, sizeof(GLfloat)* 3);
+				glVertexAttribFormat(location, 3, GL_FLOAT, GL_FALSE, 0);
+				glEnableVertexAttribArray(location);
+			}
 		}
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
@@ -480,7 +548,7 @@ namespace Application
     {
         return glm::lookAt(camera_position, camera_position + camera_forward, camera_up);
     }
-    
+
     bool setWindowInst(GLFWwindow* window)
     {
         if(window)
@@ -503,46 +571,22 @@ namespace Application
 	void renderGUI()
 	{
 
-		/*
-		
-		"res/model/head/FaceCheekPuff.obj",
-		"res/model/head/FaceCheekSuck.obj",
-		"res/model/head/FaceJawOpen.obj",
-		"res/model/head/FaceKiss.obj",
-		"res/model/head/FaceLeftBrowDown.obj",
-		"res/model/head/FaceLeftBrowUp.obj",
-		"res/model/head/FaceLeftFrown.obj",
-		"res/model/head/FaceLeftSmile.obj",
-		"res/model/head/FaceLeftSneer.obj",
-		"res/model/head/FaceRightBrowDown.obj",
-		"res/model/head/FaceRightBrowUp.obj",
-		"res/model/head/FaceRightFrown.obj",
-		"res/model/head/FaceRightSmile.obj",
-		"res/model/head/FaceRightSneer.obj"
-
-		
-		
-		*/
-
-
 		ImGui_ImplGlfwGL3_NewFrame();
 		{
 			static float f = 0.0f;
 			ImGui::Text("Facial Blending Shapes");
-			ImGui::SliderFloat("CheekPuff", &weights[0], 0.0f, 1.0f);
-			ImGui::SliderFloat("CheekSuck", &weights[1], 0.0f, 1.0f);
-			ImGui::SliderFloat("JawOpen", &weights[2], 0.0f, 1.0f);
-			ImGui::SliderFloat("Kiss", &weights[3], 0.0f, 1.0f);
-			ImGui::SliderFloat("LeftBrowDown", &weights[4], 0.0f, 1.0f);
-			ImGui::SliderFloat("LeftBrowUp", &weights[5], 0.0f, 1.0f);
-			ImGui::SliderFloat("LeftFrown", &weights[6], 0.0f, 1.0f);
-			ImGui::SliderFloat("LeftSmile", &weights[7], 0.0f, 1.0f);
-			ImGui::SliderFloat("LeftSneer", &weights[8], 0.0f, 1.0f);
-			ImGui::SliderFloat("RightBrowDown", &weights[9], 0.0f, 1.0f);
-			ImGui::SliderFloat("RightBrowUp", &weights[10], 0.0f, 1.0f);
-			ImGui::SliderFloat("RightFrown", &weights[11], 0.0f, 1.0f);
-			ImGui::SliderFloat("RightSmile", &weights[12], 0.0f, 1.0f);
-			ImGui::SliderFloat("RightSneer", &weights[13], 0.0f, 1.0f);
+			ImGui::SliderFloat("Angry", &weights[0], 0.0f, 1.0f);
+			ImGui::SliderFloat("Cry", &weights[1], 0.0f, 1.0f);
+			ImGui::SliderFloat("Fury", &weights[2], 0.0f, 1.0f);
+			ImGui::SliderFloat("Grin", &weights[3], 0.0f, 1.0f);
+			ImGui::SliderFloat("Laugh", &weights[4], 0.0f, 1.0f);
+			ImGui::SliderFloat("Rage", &weights[5], 0.0f, 1.0f);
+
+			ImGui::Text("Lighting");
+			ImGui::SliderFloat("Ambient", &ambientf, 0.0f, 1.0f);
+			ImGui::SliderFloat("Diffuse", &diffusef, 0.0f, 1.0f);
+			ImGui::SliderFloat("Specular", &specularf, 0.0f, 1.0f);
+			ImGui::SliderFloat("Shininess", &shininessf, 1.0f, 50.0f);
 		}
 
 		ImGui::Render();

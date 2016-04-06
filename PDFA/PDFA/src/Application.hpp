@@ -12,8 +12,8 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 
-#define APPLICATION_WWIDTH  (1280.f/2.f)
-#define APPLICATION_WHEIGHT (960.f/2.f)
+#define APPLICATION_WWIDTH  (1280.f)
+#define APPLICATION_WHEIGHT (960.f)
 
 namespace Application
 {
