@@ -16,25 +16,23 @@
 
 int main(void)
 {
+	//INITIALIZE WINODW
     GLFWwindow* window;
-    
     /* Initialize the library */
     if (!glfwInit())
         return -1;
-    
-    /* Create a windowed mode window and its OpenGL context */
+	/* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(APPLICATION_WWIDTH, APPLICATION_WHEIGHT, "PDFA", NULL, NULL);
+	glfwHideWindow(window); //hide window
     if (!window)
     {
         glfwTerminate();
         return -1;
     }
-    
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
-    
-    
-    /*initialize glew*/
+
+	//INITIALIZE GLEW
     glewExperimental=GL_TRUE;
     GLenum err=glewInit();
     if(err!=GLEW_OK)
@@ -42,12 +40,15 @@ int main(void)
         std::cout<<"glewInit failed, aborting."<<std::endl;
         return -1;
     }
-    
-    Application::appSetup(window);
-    
-    glEnable(GL_DEPTH_TEST);
-    
-    /* Loop until the user closes the window */
+
+	//INITIALIZE APPLICATION
+	Application::appSetup();
+	Application::bindWindow(window);
+
+	//DISPLAY WINDOW AND START MAIN LOOP
+	glfwShowWindow(window);  
+	glEnable(GL_DEPTH_TEST);
+	/* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         

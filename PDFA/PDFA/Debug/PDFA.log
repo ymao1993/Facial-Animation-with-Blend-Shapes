@@ -1,22 +1,8 @@
-﻿Build started 4/6/2016 12:38:59 AM.
+﻿Build started 4/7/2016 12:05:34 AM.
      1>Project "\\andrew.ad.cmu.edu\users\users4\ymao1\Desktop\PDFA\PDFA\PDFA\PDFA\PDFA.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I\\andrew.ad.cmu.edu\users\users4\ymao1\Desktop\PDFA\PDFA\PDFA\PDFA\include /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _CRT_SECURE_NO_WARNINGS /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt src\Application.cpp
          Application.cpp
-     1>\\andrew.ad.cmu.edu\users\users4\ymao1\desktop\pdfa\pdfa\pdfa\pdfa\src\application.cpp(46): warning C4305: 'initializing' : truncation from 'double' to 'const float'
-     1>\\andrew.ad.cmu.edu\users\users4\ymao1\desktop\pdfa\pdfa\pdfa\pdfa\src\application.cpp(186): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-     1>\\andrew.ad.cmu.edu\users\users4\ymao1\desktop\pdfa\pdfa\pdfa\pdfa\src\application.cpp(431): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
-                 \\andrew.ad.cmu.edu\users\users4\ymao1\desktop\pdfa\pdfa\pdfa\pdfa\src\application.cpp(427) : definition of 'i' ignored
-                 \\andrew.ad.cmu.edu\users\users4\ymao1\desktop\pdfa\pdfa\pdfa\pdfa\src\application.cpp(404) : definition of 'i' used
-     1>\\andrew.ad.cmu.edu\users\users4\ymao1\desktop\pdfa\pdfa\pdfa\pdfa\src\application.cpp(449): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
-                 \\andrew.ad.cmu.edu\users\users4\ymao1\desktop\pdfa\pdfa\pdfa\pdfa\src\application.cpp(427) : definition of 'i' ignored
-                 \\andrew.ad.cmu.edu\users\users4\ymao1\desktop\pdfa\pdfa\pdfa\pdfa\src\application.cpp(404) : definition of 'i' used
-     1>\\andrew.ad.cmu.edu\users\users4\ymao1\desktop\pdfa\pdfa\pdfa\pdfa\src\application.cpp(450): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
-                 \\andrew.ad.cmu.edu\users\users4\ymao1\desktop\pdfa\pdfa\pdfa\pdfa\src\application.cpp(427) : definition of 'i' ignored
-                 \\andrew.ad.cmu.edu\users\users4\ymao1\desktop\pdfa\pdfa\pdfa\pdfa\src\application.cpp(404) : definition of 'i' used
-     1>\\andrew.ad.cmu.edu\users\users4\ymao1\desktop\pdfa\pdfa\pdfa\pdfa\src\application.cpp(451): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
-                 \\andrew.ad.cmu.edu\users\users4\ymao1\desktop\pdfa\pdfa\pdfa\pdfa\src\application.cpp(427) : definition of 'i' ignored
-                 \\andrew.ad.cmu.edu\users\users4\ymao1\desktop\pdfa\pdfa\pdfa\pdfa\src\application.cpp(404) : definition of 'i' used
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"\\andrew.ad.cmu.edu\users\users4\ymao1\Desktop\PDFA\PDFA\PDFA\Debug\PDFA.exe" /INCREMENTAL /NOLOGO /LIBPATH:\\andrew.ad.cmu.edu\users\users4\ymao1\Desktop\PDFA\PDFA\PDFA\PDFA\libs glew32.lib glfw3_d.lib opengl32.lib SOIL.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"\\andrew.ad.cmu.edu\users\users4\ymao1\Desktop\PDFA\PDFA\PDFA\Debug\PDFA.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"\\andrew.ad.cmu.edu\users\users4\ymao1\Desktop\PDFA\PDFA\PDFA\Debug\PDFA.lib" /MACHINE:X86 Debug\imgui.obj
          Debug\imgui_demo.obj
@@ -52,4 +38,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:04.08
+Time Elapsed 00:00:05.22

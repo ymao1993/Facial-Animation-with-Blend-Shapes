@@ -12,14 +12,15 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 
-#define APPLICATION_WWIDTH  (1280.f)
-#define APPLICATION_WHEIGHT (960.f)
+#define APPLICATION_WWIDTH  1280
+#define APPLICATION_WHEIGHT 960
 
 namespace Application
 {
-    void appSetup(GLFWwindow *window);
+    void appSetup();
     void appLoop();
     void appDestroy();
+	void bindWindow(GLFWwindow *window);
 }
 
 #endif /* Application_hpp */

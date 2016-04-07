@@ -4,14 +4,6 @@ uniform mat4 m2w;
 uniform mat4 w2v;
 uniform mat4 persp;
 
-//simple lighting
-uniform vec3 eyepos;
-uniform vec3 light;
-uniform vec3 ambient;
-uniform vec3 diffuse;
-uniform vec3 specular;
-uniform float delta;
-
 //neutral attributes
 in vec3 vs_position;
 in vec2 vs_texcoord;
@@ -38,7 +30,10 @@ in vec3 pos5;
 in vec3 norm5;
 
 out vec2 txcoord;
-out vec4 vs_color;
+out vec3 w_position;
+out vec3 w_normal;
+
+
 
 uniform float weights[NUM_BLENDINGSHAPE];
 uniform samplerBuffer bs_sampler;
@@ -62,6 +57,7 @@ void main(void)
 	position.y /= position.w;
 	position.z /= position.w;
 	position.w = 1;
+	gl_Position = persp * w2v * position;
 
 	//blending normal...
 	blended_norm += norm0 * weights[0];
@@ -70,16 +66,10 @@ void main(void)
 	blended_norm += norm3 * weights[3];
 	blended_norm += norm4 * weights[4];
 	blended_norm += norm5 * weights[5];
-
-	//normalize
 	blended_norm = normalize(blended_norm);
 
-	//apply gouraud shading...
-	vec3 wnorm = normalize((m2w*vec4(blended_norm,0)).xyz);
-	vs_color = vec4(ambient,1);
-	vs_color += vec4(diffuse * dot(wnorm,-light),1);
-	vs_color += vec4(specular * pow(max(0,dot(normalize(position.xyz - eyepos), reflect(-light, wnorm))),delta) ,1);
-
-	gl_Position = persp * w2v * position;
+	//pass data to fragment shader for shading
+	w_position = position.xyz;
+	w_normal = normalize((m2w*vec4(blended_norm,0)).xyz);
 
 }

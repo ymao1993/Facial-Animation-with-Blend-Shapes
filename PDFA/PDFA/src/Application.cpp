@@ -24,7 +24,9 @@
 
 namespace Application
 {
-    /*const*/
+#pragma region variables
+
+    /*constants*/
     static const char* ObjFileName          = "res/model/humanHead/head-reference.obj";
     static const char* textureFileName      = "res/model/humanHead/headTexture.jpg";
     static const char* vertexShaderName     = "res/shader/defaultShader.vs.glsl";
@@ -41,15 +43,13 @@ namespace Application
         //"res/model/humanHead/head-08-smile.obj",
         //"res/model/humanHead/head-09-surprise.obj",
     };
-    
-    
-    static const float objScale = 0.12;
+    static const float objScale = 0.12f;
     
     /*application*/
     static GLFWwindow* window = NULL;
-    static bool setWindowInst(GLFWwindow* window);
     static void render();
     static void loadResources();
+	static bool GUIready = false;
 
 	/*Graphics User Interface*/
 	static void initGUI();
@@ -92,7 +92,6 @@ namespace Application
 	static GLuint vbo_bs_positions[NUM_BLENDSHAPE];
 	static GLuint vbo_bs_normals[NUM_BLENDSHAPE];
     
-    
     /*camera*/
     static float camera_speed;
     static glm::vec3 camera_position;
@@ -106,14 +105,13 @@ namespace Application
     static void updateCamera();
     static glm::mat4 getPerspective();
     static glm::mat4 getWorld2View();
+
+#pragma endregion
     
-    
-    void appSetup(GLFWwindow* window)
+#pragma region Application Logic
+    void appSetup()
     {
         std::cout << "Setting up application..." << std::endl;
-
-        std::cout << "- Set window instance..." << std::endl;
-        setWindowInst(window);
         
         std::cout << "- Load Resources" << std::endl;
         loadResources();
@@ -126,9 +124,6 @@ namespace Application
         
         std::cout << "- Initialize Camera..." << std::endl;
         initCamera();
-
-		std::cout << "- Initialize GUI..." << std::endl;
-		initGUI();
         
         std::cout << "Start rendering..." << std::endl;
     }
@@ -154,7 +149,10 @@ namespace Application
 		glDeleteBuffers(NUM_BLENDSHAPE, vbo_bs_positions);
 		glDeleteVertexArrays(1, &vao);
     }
-    
+
+#pragma endregion
+
+#pragma region subRoutines
     /**
      * This function performs the rendering
      */
@@ -215,8 +213,8 @@ namespace Application
     void loadResources()
     {
 		loadShader();
+		loadTexture();
         loadObj();
-        loadTexture();
     }
     
     /**
@@ -397,7 +395,6 @@ namespace Application
         }
         
         glBindTexture(GL_TEXTURE_2D, 0);
-        
         return;
     }
     
@@ -414,7 +411,7 @@ namespace Application
         {
             const char* ObjFileName = blendShapesFileNames[i];
             
-            std::cout << "reading " << ObjFileName << std::endl;
+            std::cout << "-- Reading " << ObjFileName << std::endl;
             
             std::vector<tinyobj::shape_t> shapes;
             std::vector<tinyobj::material_t> materials;
@@ -503,8 +500,10 @@ namespace Application
 		}
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
-    }
-    
+	}
+#pragma endregion
+
+#pragma region Camera
     /**
      * Initialize Camera's configuration paramters
      */
@@ -519,7 +518,7 @@ namespace Application
         camera_zNear = 0.01f;
         camera_zFar = 100.f;
     }
-    
+   
     /**
      * Update Camera
      */
@@ -549,20 +548,21 @@ namespace Application
         return glm::lookAt(camera_position, camera_position + camera_forward, camera_up);
     }
 
-    bool setWindowInst(GLFWwindow* window)
+    void bindWindow(GLFWwindow* window)
     {
         if(window)
         {
             Application::window = window;
-            return true;
         }
         else
         {
             std::cout <<"The pointer to window cannot be NULL"<<std::endl;
-            return false;
+			exit(-1);
         }
     }
+#pragma endregion
 
+#pragma region Graphics User Interface(GUI)
 	void initGUI()
 	{
 		ImGui_ImplGlfwGL3_Init(window, true);
@@ -570,6 +570,7 @@ namespace Application
 
 	void renderGUI()
 	{
+		if (!GUIready) initGUI();
 
 		ImGui_ImplGlfwGL3_NewFrame();
 		{
@@ -596,5 +597,5 @@ namespace Application
 	{
 		ImGui_ImplGlfwGL3_Shutdown();
 	}
+#pragma endregion
 }
-
